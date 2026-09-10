@@ -1,0 +1,112 @@
+# Inngest API
+
+- [API Overview](/): Complete reference documentation for the Inngest REST API.
+- [Authentication](/authentication): How to authenticate with the Inngest REST API.
+- v1
+  - [v1 REST API](/v1)
+
+  - **Events**
+  - [List events](/v1/events/ListEvents): Fetches recent events from your environment.
+  - [Get an event](/v1/events/GetEvent): Retrieve a single event within your environment, given its internal ID
+  - [List event function runs](/v1/events/ListEventRuns): Returns function runs initialized by the given event
+
+  - **Function runs**
+  - [Get a function run](/v1/function-runs/GetRun): Returns a single function run by its run ID
+  - [Cancel a function run](/v1/function-runs/CancelRun): Cancels a running function immediately.  No new steps will run after a function is cancelled.
+  - [Fetch function run jobs](/v1/function-runs/GetRunJobs): An endpoint to fetch a subset of the function run's jobs within the function_id queue, in order of earliest to latest. This primarily allows you to see the order of the run's jobs within the function queue.
+
+A single function enqueues all function run jobs wihtin the same queue.  This endpoint fetches a subset of jobs for a given function run.
+
+This endpoint is rate limited and cached for 5 seconds.
+
+  - **Signals**
+  - [Resume signal](/v1/signals/ResumeSignal): Sends data to resume a given signal
+
+  - **Cancellations**
+  - [List cancellations](/v1/cancellations/ListCancellations): Returns all cancellations in your environment
+  - [Create a cancellation](/v1/cancellations/CreateCancellation): Creates a bulk cancellation, cancelling all functions in the given time range matching an optional expression
+  - [Delete a cancellation](/v1/cancellations/DeleteCancellation): Delete a cancellation, preventing the cancellation from stopping function runs between the given dates with a given expression.
+
+  - **Webhooks**
+  - [Get webhooks](/v1/webhooks/ListWebhooks): Get all webhook endpoints in the given environment.
+  - [Create webhook](/v1/webhooks/CreateWebhook): Create a new webhook endpoint with the given configuration.
+  - [Get webhook](/v1/webhooks/GetWebhook): Get a webhook endpoint's configuration
+  - [Delete webhook](/v1/webhooks/DeleteWebhook): Delete a webhook endpoint
+  - [Update webhook](/v1/webhooks/UpdateWebhook): Update a webhook endpoint's configuration
+- v2
+
+  - **Account**
+  - [Get account](/v2/account/FetchAccount): Returns the account for the authenticated user
+
+  - **Apps**
+  - [Get apps](/v2/apps/GetApps): Lists active apps in the authenticated environment. Set archived to true to list archived apps instead.
+  - [Get app](/v2/apps/GetApp): Fetches details for a single app, including sync metadata and function count
+  - [Sync app](/v2/apps/SyncApp): Sync an app at the provided URL.
+
+  - **Functions**
+  - [Get functions](/v2/functions/GetFunctions): Lists function configuration and status details for an app
+  - [Get function](/v2/functions/GetFunction): Fetches function configuration and status details for a function within an app
+  - [Invoke function](/v2/functions/InvokeFunction): Invokes a function, executing the function either asynchronously or synchronously based on the mode parameter in the request body
+
+  - **Experiments**
+  - [List experiments for a function](/v2/experiments/ListExperiments2): Lists observed experiments for one function in the authenticated environment.
+  - [Get experiment aggregates](/v2/experiments/GetExperiment): Fetches variant run counts and score aggregates for one experiment on one function.
+  - [List experiments](/v2/experiments/ListExperiments): Lists observed experiments in the authenticated environment. Use the nested app and function route to scope results to one function.
+
+  - **Runs**
+  - [List runs for a function](/v2/runs/ListFunctionRuns): Lists runs for one function in the authenticated environment
+  - [Get event runs](/v2/runs/GetEventRuns): Lists function runs triggered by a specific event
+  - [List runs](/v2/runs/ListRuns): Lists runs in the authenticated environment, optionally filtered by app and function IDs
+  - [Get function run](/v2/runs/GetFunctionRun): Fetches the canonical run summary for a single function run
+  - [Cancel function run](/v2/runs/CancelRun): Cancels an in-progress function run
+  - [Rerun function run](/v2/runs/Rerun): Creates a new run using the original run's triggering event data
+  - [Create score](/v2/runs/CreateScore): Submits one or more named scores for a function run, or for specific steps when step IDs are provided. Scores are recorded as run metadata and aggregated for experiments.
+  - [Get function trace](/v2/runs/GetFunctionTrace): Fetches the trace tree for a single function run
+
+  - **Webhooks**
+  - [List webhooks](/v2/webhooks/ListWebhooks): Lists all webhooks in the specified environment
+  - [Create webhook](/v2/webhooks/CreateWebhook): Creates a new webhook for receiving events
+
+  - **Environments**
+  - [List environments](/v2/environments/FetchAccountEnvs): List of all custom environments.
+  - [Create environment](/v2/environments/CreateEnv): Create custom environment
+  - [Update environment](/v2/environments/PatchEnv): Partially updates an environment. Only the provided fields will be modified.
+
+  - **Events**
+  - [Send event](/v2/events/SendEvent): Sends one event for testing and debugging. The request accepts the name, data, user, id, and ts fields; send batches and other Event API fields through an Inngest SDK or the Event API. This endpoint uses REST API rate limits and is not intended for high-volume ingestion. Use the returned event ID with the event runs endpoint to inspect any function runs triggered by the event.
+
+  - **Insights**
+  - [List event type schemas](/v2/insights/ListInsightsEventSchemas): Returns a paginated list of event type schemas, where each schema describes the shape of a specific event's data as nested JSON.
+  - [Query insights](/v2/insights/QueryInsights): Query Insights using the provided SQL query.
+  - [Generate insights query from prompt](/v2/insights/QueryInsightsPrompt): Translates a natural language prompt into an Insights SQL query.
+  - [List insights tables](/v2/insights/ListInsightsTables): Lists the available tables that can be queried via the Insights query endpoint.
+
+  - **Keys**
+  - [List account event keys](/v2/keys/FetchAccountEventKeys): Lists event keys for a specific account, optionally filtered by environment. If the environment header isn't specified, this returns the default production environment's keys.
+  - [List account signing keys](/v2/keys/FetchAccountSigningKeys): Lists signing keys for a specific account, optionally filtered by environment.  If the environment header isn't specified, this returns the default production environment's keys.
+
+  - **Partner API**
+  - [List partner accounts](/v2/partner-api/FetchPartnerAccounts): Lists sub-accounts (if you have partner access)
+  - [Create partner account](/v2/partner-api/CreatePartnerAccount): Creates a sub-account (if you have partner access)
+
+  - **Sandboxes**
+  - [List sandboxes](/v2/sandboxes/ListSandboxes)
+  - [Create a sandbox](/v2/sandboxes/CreateSandbox)
+  - [Get a sandbox](/v2/sandboxes/GetSandbox)
+  - [Destroy a sandbox](/v2/sandboxes/DestroySandbox)
+  - [Execute a command in a sandbox](/v2/sandboxes/ExecSandbox)
+  - [Read a sandbox file](/v2/sandboxes/ReadSandboxFile)
+  - [Write a sandbox file](/v2/sandboxes/WriteSandboxFile)
+  - [Stream sandbox logs](/v2/sandboxes/StreamSandboxLogs)
+  - [List sandbox processes](/v2/sandboxes/ListSandboxProcesses)
+  - [Start a sandbox process](/v2/sandboxes/StartSandboxProcess)
+  - [Get a sandbox process](/v2/sandboxes/GetSandboxProcess)
+  - [Get sandbox process output](/v2/sandboxes/GetSandboxProcessOutput)
+  - [Stream sandbox process output](/v2/sandboxes/StreamSandboxProcessOutput)
+  - [Signal a sandbox process](/v2/sandboxes/SignalSandboxProcess)
+  - [Wait for a sandbox process](/v2/sandboxes/WaitSandboxProcess)
+
+  - **Sessions**
+  - [List session keys](/v2/sessions/ListSessionKeys): Lists session keys observed in the authenticated environment.
+  - [List sessions](/v2/sessions/ListSessions): Lists session IDs for one session key in the authenticated environment.
+  - [List session runs](/v2/sessions/ListSessionRuns): Lists runs associated with one session ID in the authenticated environment.
