@@ -98,6 +98,7 @@ This endpoint is rate limited and cached for 5 seconds.
   - [Read a sandbox file](/v2/sandboxes/ReadSandboxFile)
   - [Write a sandbox file](/v2/sandboxes/WriteSandboxFile)
   - [Stream sandbox logs](/v2/sandboxes/StreamSandboxLogs)
+  - [Pause a sandbox](/v2/sandboxes/PauseSandbox)
   - [List sandbox processes](/v2/sandboxes/ListSandboxProcesses)
   - [Start a sandbox process](/v2/sandboxes/StartSandboxProcess)
   - [Get a sandbox process](/v2/sandboxes/GetSandboxProcess)
@@ -105,6 +106,11 @@ This endpoint is rate limited and cached for 5 seconds.
   - [Stream sandbox process output](/v2/sandboxes/StreamSandboxProcessOutput)
   - [Signal a sandbox process](/v2/sandboxes/SignalSandboxProcess)
   - [Wait for a sandbox process](/v2/sandboxes/WaitSandboxProcess)
+  - [Resume a sandbox](/v2/sandboxes/ResumeSandbox)
+  - [Create a sandbox snapshot](/v2/sandboxes/CreateSandboxSnapshot)
+  - [List sandbox snapshots](/v2/sandboxes/ListSandboxSnapshots)
+  - [Get a sandbox snapshot](/v2/sandboxes/GetSandboxSnapshot)
+  - [Delete a sandbox snapshot](/v2/sandboxes/DeleteSandboxSnapshot)
 
   - **Sessions**
   - [List session keys](/v2/sessions/ListSessionKeys): Lists session keys observed in the authenticated environment.

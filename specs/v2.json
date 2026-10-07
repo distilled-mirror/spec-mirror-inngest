@@ -747,7 +747,7 @@
             }
           },
           {
-            "description": "Statuses to include, using response status values such as COMPLETED, FAILED, RUNNING, QUEUED, or CANCELLED",
+            "description": "Statuses to include, using response status values such as COMPLETED, FAILED, RUNNING, QUEUED, CANCELLED, SKIPPED, or PAUSED",
             "in": "query",
             "name": "status",
             "schema": {
@@ -772,6 +772,25 @@
             "schema": {
               "default": "DESC",
               "type": "string"
+            }
+          },
+          {
+            "description": "CEL expression used to filter runs by event, output, or error data",
+            "in": "query",
+            "name": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Optional run expansions. Supported values: deferred_from.",
+            "in": "query",
+            "name": "include",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
             }
           }
         ],
@@ -2840,7 +2859,7 @@
             }
           },
           {
-            "description": "Statuses to include, using response status values such as COMPLETED, FAILED, RUNNING, QUEUED, or CANCELLED",
+            "description": "Statuses to include, using response status values such as COMPLETED, FAILED, RUNNING, QUEUED, CANCELLED, SKIPPED, or PAUSED",
             "in": "query",
             "name": "status",
             "schema": {
@@ -2887,6 +2906,25 @@
             "schema": {
               "default": "DESC",
               "type": "string"
+            }
+          },
+          {
+            "description": "CEL expression used to filter runs by event, output, or error data",
+            "in": "query",
+            "name": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Optional run expansions. Supported values: deferred_from.",
+            "in": "query",
+            "name": "include",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
             }
           }
         ],
@@ -3076,7 +3114,6 @@
           "content": {
             "application/json": {
               "schema": {
-                "description": "Scores to record for the run. The REST request body is this array. Writes are applied in order and are not atomic; if a later score fails, earlier scores may already be recorded. Score writes are best-effort: run and step targets are not validated before writing, and scores for targets that do not exist may not surface in queries. Maximum 100 scores.",
                 "items": {
                   "$ref": "#/components/schemas/v2CreateScoreInput"
                 },
@@ -3515,6 +3552,43 @@
         "x-beta": true
       }
     },
+    "/sandboxes/{sandboxId}/pause": {
+      "post": {
+        "operationId": "V2_PauseSandbox",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sandboxId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2PauseSandboxResponse"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Pause a sandbox",
+        "tags": [
+          "Sandboxes"
+        ],
+        "x-beta": true
+      }
+    },
     "/sandboxes/{sandboxId}/processes": {
       "get": {
         "operationId": "V2_ListSandboxProcesses",
@@ -3881,6 +3955,80 @@
         "x-beta": true
       }
     },
+    "/sandboxes/{sandboxId}/resume": {
+      "post": {
+        "operationId": "V2_ResumeSandbox",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sandboxId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2ResumeSandboxResponse"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Resume a sandbox",
+        "tags": [
+          "Sandboxes"
+        ],
+        "x-beta": true
+      }
+    },
+    "/sandboxes/{sandboxId}/snapshots": {
+      "post": {
+        "operationId": "V2_CreateSandboxSnapshot",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sandboxId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2CreateSandboxSnapshotResponse"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Create a sandbox snapshot",
+        "tags": [
+          "Sandboxes"
+        ],
+        "x-beta": true
+      }
+    },
     "/sessions": {
       "get": {
         "description": "Lists session keys observed in the authenticated environment.",
@@ -4092,6 +4240,122 @@
         "summary": "List session runs",
         "tags": [
           "Sessions"
+        ],
+        "x-beta": true
+      }
+    },
+    "/snapshots": {
+      "get": {
+        "operationId": "V2_ListSandboxSnapshots",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2ListSandboxSnapshotsResponse"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "List sandbox snapshots",
+        "tags": [
+          "Sandboxes"
+        ],
+        "x-beta": true
+      }
+    },
+    "/snapshots/{snapshotId}": {
+      "delete": {
+        "operationId": "V2_DeleteSandboxSnapshot",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "snapshotId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2DeleteSandboxSnapshotResponse"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Delete a sandbox snapshot",
+        "tags": [
+          "Sandboxes"
+        ],
+        "x-beta": true
+      },
+      "get": {
+        "operationId": "V2_GetSandboxSnapshot",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "snapshotId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2GetSandboxSnapshotResponse"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Get a sandbox snapshot",
+        "tags": [
+          "Sandboxes"
         ],
         "x-beta": true
       }
@@ -4497,6 +4761,16 @@
           "name": {
             "type": "string"
           },
+          "secrets": {
+            "description": "Exact workspace secret names, each injected under that same environment\nvariable name. Names must be unique, valid environment keys, and must not\noverlap with environment. Names resolve to UUID bindings when creating the\nworkload; create recovery retains those bindings even if a secret is archived\nand its name reused. Values are fetched at launch and may remain in the guest\nand its snapshots. Cannot be supplied with snapshot_id.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "snapshotId": {
+            "type": "string"
+          },
           "vcpu": {
             "format": "int64",
             "type": "integer"
@@ -4508,6 +4782,17 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/v2Sandbox"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/v2SandboxResponseMetadata"
+          }
+        },
+        "type": "object"
+      },
+      "v2CreateSandboxSnapshotResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/v2SandboxSnapshot"
           },
           "metadata": {
             "$ref": "#/components/schemas/v2SandboxResponseMetadata"
@@ -4583,6 +4868,9 @@
             "$ref": "#/components/schemas/v2ResponseMetadata"
           }
         },
+        "type": "object"
+      },
+      "v2DeleteSandboxSnapshotResponse": {
         "type": "object"
       },
       "v2DestroySandboxResponse": {
@@ -5116,6 +5404,9 @@
           },
           "name": {
             "type": "string"
+          },
+          "slug": {
+            "type": "string"
           }
         },
         "type": "object"
@@ -5137,6 +5428,9 @@
           "app": {
             "$ref": "#/components/schemas/v2AppRef"
           },
+          "deferredFrom": {
+            "$ref": "#/components/schemas/v2RunDeferredFrom"
+          },
           "durationMs": {
             "format": "uint64",
             "type": "string"
@@ -5150,6 +5444,9 @@
           },
           "id": {
             "type": "string"
+          },
+          "isDeferred": {
+            "type": "boolean"
           },
           "output": {
             "type": "object"
@@ -5173,13 +5470,17 @@
       },
       "v2FunctionRunStatus": {
         "default": "UNSPECIFIED",
+        "description": " - FUNCTION_RUN_STATUS_PAUSED: PAUSED is synthetic: the run is RUNNING, but its function is paused.\n - FUNCTION_RUN_STATUS_UNKNOWN: UNKNOWN is returned when the persisted run status cannot be recognized.",
         "enum": [
           "UNSPECIFIED",
           "QUEUED",
           "RUNNING",
           "COMPLETED",
           "FAILED",
-          "CANCELLED"
+          "CANCELLED",
+          "SKIPPED",
+          "PAUSED",
+          "UNKNOWN"
         ],
         "type": "string"
       },
@@ -5399,6 +5700,17 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/v2Sandbox"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/v2SandboxResponseMetadata"
+          }
+        },
+        "type": "object"
+      },
+      "v2GetSandboxSnapshotResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/v2SandboxSnapshot"
           },
           "metadata": {
             "$ref": "#/components/schemas/v2SandboxResponseMetadata"
@@ -5705,6 +6017,23 @@
         },
         "type": "object"
       },
+      "v2ListSandboxSnapshotsResponse": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/v2SandboxSnapshot"
+            },
+            "type": "array"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/v2SandboxResponseMetadata"
+          },
+          "page": {
+            "$ref": "#/components/schemas/v2SandboxPage"
+          }
+        },
+        "type": "object"
+      },
       "v2ListSandboxesResponse": {
         "properties": {
           "data": {
@@ -5812,6 +6141,17 @@
           },
           "metadata": {
             "$ref": "#/components/schemas/v2ResponseMetadata"
+          }
+        },
+        "type": "object"
+      },
+      "v2PauseSandboxResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/v2Sandbox"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/v2SandboxResponseMetadata"
           }
         },
         "type": "object"
@@ -5953,6 +6293,28 @@
           },
           "timeRange": {
             "$ref": "#/components/schemas/v2TimeRange"
+          }
+        },
+        "type": "object"
+      },
+      "v2ResumeSandboxResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/v2Sandbox"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/v2SandboxResponseMetadata"
+          }
+        },
+        "type": "object"
+      },
+      "v2RunDeferredFrom": {
+        "properties": {
+          "functionName": {
+            "type": "string"
+          },
+          "functionSlug": {
+            "type": "string"
           }
         },
         "type": "object"
@@ -6132,6 +6494,66 @@
           }
         },
         "type": "object"
+      },
+      "v2SandboxSnapshot": {
+        "properties": {
+          "compatibilityId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "diskPackCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "error": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "memoryPackCount": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "resources": {
+            "$ref": "#/components/schemas/v2SandboxResourceSpec"
+          },
+          "sourceImageId": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/v2SandboxSnapshotStatus"
+          },
+          "storedBytes": {
+            "format": "uint64",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "v2SandboxSnapshotStatus": {
+        "default": "UNSPECIFIED",
+        "enum": [
+          "UNSPECIFIED",
+          "CREATING",
+          "READY",
+          "DELETING",
+          "DELETED",
+          "FAILED",
+          "LOST"
+        ],
+        "type": "string"
       },
       "v2SandboxStatus": {
         "default": "UNSPECIFIED",
@@ -6578,8 +7000,8 @@
       "v2WriteSandboxFileData": {
         "properties": {
           "bytesWritten": {
-            "format": "uint64",
-            "type": "string"
+            "format": "int64",
+            "type": "integer"
           },
           "path": {
             "type": "string"
