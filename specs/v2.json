@@ -673,6 +673,54 @@
         ]
       }
     },
+    "/apps/{appId}/functions/{functionId}/pause": {
+      "post": {
+        "description": "Pauses a function. Idempotent: pausing a paused function returns 200 and changes nothing. Send no request body. Runs already executing may continue. In Cloud, the pause can take up to a minute to apply, and runs still unfinished after 7 days paused are cancelled, same as pausing in the dashboard. In the dev server, the pause applies right away and lasts until resumed or restarted. No bulk pause; call once per function.",
+        "operationId": "V2_PauseFunction",
+        "parameters": [
+          {
+            "description": "App ID.",
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Function ID.",
+            "in": "path",
+            "name": "functionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2PauseFunctionResponse"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Pause a function",
+        "tags": [
+          "Functions"
+        ],
+        "x-beta": true
+      }
+    },
     "/apps/{appId}/functions/{functionId}/runs": {
       "get": {
         "description": "Lists runs for one function in the authenticated environment",
@@ -692,13 +740,6 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "includeOutput",
-            "schema": {
-              "type": "boolean"
             }
           },
           {
@@ -783,11 +824,15 @@
             }
           },
           {
-            "description": "Optional run expansions. Supported values: deferred_from.",
+            "description": "Optional run expansions selected by their lowerCamelCase API names.",
             "in": "query",
             "name": "include",
             "schema": {
               "items": {
+                "enum": [
+                  "output",
+                  "deferredFrom"
+                ],
                 "type": "string"
               },
               "type": "array"
@@ -924,6 +969,225 @@
         "summary": "Sync app",
         "tags": [
           "Apps"
+        ],
+        "x-beta": true
+      }
+    },
+    "/builds": {
+      "get": {
+        "operationId": "V2_ListBuilds",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2ListBuildsResponse"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "List recent workspace builds",
+        "tags": [
+          "Builds"
+        ],
+        "x-beta": true
+      }
+    },
+    "/builds/{buildId}": {
+      "get": {
+        "operationId": "V2_GetBuild",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "buildId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2BuildResponse"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Get a build",
+        "tags": [
+          "Builds"
+        ],
+        "x-beta": true
+      }
+    },
+    "/builds/{buildId}/cancel": {
+      "post": {
+        "operationId": "V2_CancelBuild",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "buildId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V2CancelBuildBody"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2BuildResponse"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Cancel an unfinished build",
+        "tags": [
+          "Builds"
+        ],
+        "x-beta": true
+      }
+    },
+    "/builds/{name}": {
+      "post": {
+        "description": "Upload one linux/amd64 docker-save tar or tar.gz to upload_url in a PUT request with every header in upload_headers, then commit the upload to start conversion. Requires image-build access.",
+        "operationId": "V2_CreateBuild",
+        "parameters": [
+          {
+            "description": "A workspace-local name, without an account or inngest/ prefix.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V2CreateBuildBody"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2CreateBuildResponse"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Create a build",
+        "tags": [
+          "Builds"
+        ],
+        "x-beta": true
+      }
+    },
+    "/builds/{name}/{buildId}/commit": {
+      "post": {
+        "operationId": "V2_CommitBuild",
+        "parameters": [
+          {
+            "description": "Must match the name used when creating the build.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "buildId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V2CommitBuildBody"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2BuildResponse"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Commit an upload and start the build",
+        "tags": [
+          "Builds"
         ],
         "x-beta": true
       }
@@ -1709,13 +1973,6 @@
             }
           },
           {
-            "in": "query",
-            "name": "includeOutput",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
             "description": "Pagination cursor from previous response",
             "in": "query",
             "name": "cursor",
@@ -1731,6 +1988,20 @@
               "default": "20",
               "format": "int32",
               "type": "integer"
+            }
+          },
+          {
+            "description": "Optional run expansions selected by their lowerCamelCase API names.",
+            "in": "query",
+            "name": "include",
+            "schema": {
+              "items": {
+                "enum": [
+                  "output"
+                ],
+                "type": "string"
+              },
+              "type": "array"
             }
           }
         ],
@@ -2807,13 +3078,6 @@
         "operationId": "V2_ListRuns",
         "parameters": [
           {
-            "in": "query",
-            "name": "includeOutput",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
             "description": "Pagination cursor from previous response",
             "in": "query",
             "name": "cursor",
@@ -2917,11 +3181,15 @@
             }
           },
           {
-            "description": "Optional run expansions. Supported values: deferred_from.",
+            "description": "Optional run expansions selected by their lowerCamelCase API names.",
             "in": "query",
             "name": "include",
             "schema": {
               "items": {
+                "enum": [
+                  "output",
+                  "deferredFrom"
+                ],
                 "type": "string"
               },
               "type": "array"
@@ -2966,10 +3234,17 @@
             }
           },
           {
+            "description": "Optional run expansions selected by their lowerCamelCase API names.",
             "in": "query",
-            "name": "includeOutput",
+            "name": "include",
             "schema": {
-              "type": "boolean"
+              "items": {
+                "enum": [
+                  "output"
+                ],
+                "type": "string"
+              },
+              "type": "array"
             }
           }
         ],
@@ -3162,10 +3437,17 @@
             }
           },
           {
+            "description": "Optional trace expansions selected by their lowerCamelCase API names.",
             "in": "query",
-            "name": "includeOutput",
+            "name": "include",
             "schema": {
-              "type": "boolean"
+              "items": {
+                "enum": [
+                  "output"
+                ],
+                "type": "string"
+              },
+              "type": "array"
             }
           }
         ],
@@ -4005,6 +4287,17 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V2CreateSandboxSnapshotBody"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
         "responses": {
           "200": {
             "content": {
@@ -4262,6 +4555,14 @@
               "format": "int32",
               "type": "integer"
             }
+          },
+          {
+            "description": "Only snapshots with exactly this name, newest first.",
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -4363,7 +4664,42 @@
   },
   "components": {
     "schemas": {
+      "V2CancelBuildBody": {
+        "type": "object"
+      },
       "V2CancelRunBody": {
+        "type": "object"
+      },
+      "V2CommitBuildBody": {
+        "type": "object"
+      },
+      "V2CreateBuildBody": {
+        "description": "runtime config such as ENV and CMD comes from the image archive.",
+        "properties": {
+          "architecture": {
+            "type": "string"
+          },
+          "tag": {
+            "type": "string"
+          },
+          "uploadSha256": {
+            "description": "Lowercase SHA256 of the uploaded archive bytes.  commit fails when the\nuploaded bytes have a different hash.",
+            "type": "string"
+          },
+          "uploadSizeBytes": {
+            "format": "int64",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V2CreateSandboxSnapshotBody": {
+        "properties": {
+          "name": {
+            "description": "Unique in the environment among snapshots that are creating, or ready and\nnot expired. A name held by such a snapshot is rejected with\nsandbox_snapshot_name_taken; any other snapshot's name can be reused.",
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "V2ExecSandboxBody": {
@@ -4656,6 +4992,53 @@
         },
         "type": "object"
       },
+      "v2Build": {
+        "properties": {
+          "architecture": {
+            "type": "string"
+          },
+          "artifactDigest": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          },
+          "finishedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "description": "pending (uploading), uploaded (queued/processing), ready, or failed.",
+            "type": "string"
+          },
+          "tag": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "v2BuildResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/v2Build"
+          }
+        },
+        "type": "object"
+      },
       "v2CancelRunData": {
         "properties": {
           "runId": {
@@ -4724,6 +5107,29 @@
         },
         "type": "object"
       },
+      "v2CreateBuildResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/v2Build"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "uploadHeaders": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "send each header with its exact value.  the server can add a header,\nsuch as a checksum of the archive, without a client change.",
+            "type": "object"
+          },
+          "uploadUrl": {
+            "description": "send the archive in a PUT request body with every header in\nupload_headers.  set Content-Length to upload_size_bytes.  storage\nrejects a request that changes a header or the length.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "v2CreateEnvRequest": {
         "properties": {
           "id": {
@@ -4753,6 +5159,10 @@
               "type": "string"
             },
             "type": "object"
+          },
+          "image": {
+            "description": "An already-published image accessible to this workspace: name[:tag],\nname@sha256:<hex>, or sha256:<hex>. Omitted tags mean latest. Omit image\nto use the default base image. Cannot be supplied with snapshot_id.\nResolves once for a new sandbox; name-idempotent retries keep the original\nartifact even when a tag moves. Does not build or upload an image.",
+            "type": "string"
           },
           "memoryMb": {
             "format": "int64",
@@ -5916,6 +6326,18 @@
         },
         "type": "object"
       },
+      "v2ListBuildsResponse": {
+        "properties": {
+          "data": {
+            "description": "The most recent 100 builds in the selected workspace.",
+            "items": {
+              "$ref": "#/components/schemas/v2Build"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "v2ListExperimentsResponse": {
         "properties": {
           "data": {
@@ -6145,6 +6567,17 @@
         },
         "type": "object"
       },
+      "v2PauseFunctionResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/v2Function"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/v2ResponseMetadata"
+          }
+        },
+        "type": "object"
+      },
       "v2PauseSandboxResponse": {
         "properties": {
           "data": {
@@ -6358,6 +6791,10 @@
           "id": {
             "type": "string"
           },
+          "imageDigest": {
+            "description": "The pinned launch artifact, formatted as sha256:<hex>. Absent for legacy\nsandboxes without a catalog image. This is not the rootfs file checksum.",
+            "type": "string"
+          },
           "imageRef": {
             "type": "string"
           },
@@ -6521,6 +6958,9 @@
           "memoryPackCount": {
             "format": "int64",
             "type": "integer"
+          },
+          "name": {
+            "type": "string"
           },
           "resources": {
             "$ref": "#/components/schemas/v2SandboxResourceSpec"
@@ -6866,6 +7306,10 @@
             "format": "date-time",
             "type": "string"
           },
+          "groupKind": {
+            "description": "The kind its caller gave a span group, such as \"job\" or \"agent\". Absent\nfor steps and for groups without one.",
+            "type": "string"
+          },
           "id": {
             "type": "string"
           },
@@ -6879,6 +7323,10 @@
             "type": "array"
           },
           "name": {
+            "type": "string"
+          },
+          "origin": {
+            "description": "The library that created this step or span group on the user's behalf,\nas \"<package>@<version>\", such as \"@inngest/ci@0.1.0\". Absent otherwise.",
             "type": "string"
           },
           "output": {
@@ -6900,6 +7348,10 @@
           },
           "stepOp": {
             "$ref": "#/components/schemas/v2TraceStepOp"
+          },
+          "stepType": {
+            "description": "The kind of step this span is, such as \"RUN\" or \"SLEEP\". \"SPAN_GROUP\"\nmarks a virtual span grouping the steps called inside an SDK span group.",
+            "type": "string"
           }
         },
         "type": "object"
@@ -7070,6 +7522,10 @@
     {
       "description": "Create and manage isolated compute sandboxes",
       "name": "Sandboxes"
+    },
+    {
+      "description": "Build images for sandboxes and compute",
+      "name": "Builds"
     },
     {
       "description": "Inspect experiment variants and aggregates",
