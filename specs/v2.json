@@ -675,7 +675,7 @@
     },
     "/apps/{appId}/functions/{functionId}/pause": {
       "post": {
-        "description": "Pauses a function. Idempotent: pausing a paused function returns 200 and changes nothing. Send no request body. Runs already executing may continue. In Cloud, the pause can take up to a minute to apply, and runs still unfinished after 7 days paused are cancelled, same as pausing in the dashboard. In the dev server, the pause applies right away and lasts until resumed or restarted. No bulk pause; call once per function.",
+        "description": "Pauses a function. Idempotent: pausing a paused function returns 200 and changes nothing. Send no request body. Runs already executing may continue. In Cloud, the pause can take up to a minute to apply, new runs are skipped while paused, and runs still unfinished after 7 days paused are cancelled, same as pausing in the dashboard. Wait for a pause or resume to finish before sending the opposite action: requests sent close together can be skipped or apply out of order. Confirm with GetFunction after the cache has refreshed and retry if needed. In the dev server, the pause applies right away, new runs stay queued, and it lasts until resumed or restarted. No bulk pause; call once per function.",
         "operationId": "V2_PauseFunction",
         "parameters": [
           {
@@ -715,6 +715,123 @@
           }
         ],
         "summary": "Pause a function",
+        "tags": [
+          "Functions"
+        ],
+        "x-beta": true
+      }
+    },
+    "/apps/{appId}/functions/{functionId}/replays": {
+      "post": {
+        "description": "Creates an asynchronous replay for matching runs of one function. Cloud bounds have millisecond precision: from rounds down; until includes the end of its millisecond. Dev server bounds are inclusive at stored timestamp precision. Dev server replays run in memory and are lost on restart. Requests are not idempotent: retrying creates another replay. In Inngest Cloud, replays are listed on the function's Replays page in the dashboard. Scheduling is best effort and does not preserve event order.",
+        "operationId": "V2_CreateReplay",
+        "parameters": [
+          {
+            "description": "SDK app ID containing the function",
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "SDK function ID within the app. Legacy app-prefixed function IDs are also accepted (at most 256 bytes).",
+            "in": "path",
+            "name": "functionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V2CreateReplayBody"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2CreateReplayResponse"
+                }
+              }
+            },
+            "description": "Replay successfully created"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request - invalid input data"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Create replay",
+        "tags": [
+          "Runs"
+        ],
+        "x-beta": true
+      }
+    },
+    "/apps/{appId}/functions/{functionId}/resume": {
+      "post": {
+        "description": "Resumes a paused function. Idempotent: resuming a function that is not paused returns 200 with isPaused: false. The dev server still wakes the queue so retries can recover a failed wake. Send no request body. In Cloud, the response reflects the requested state; the resume can take up to a minute to apply. A future scheduled pause returns 409 and is left unchanged. New runs skipped while paused are not recreated. Wait for a pause or resume to finish before sending the opposite action: requests sent close together can be skipped or apply out of order. Confirm with GetFunction after the cache has refreshed and retry if needed. In the dev server, resume clears the pause after waking the queue; a failed wake leaves the pause in place. Queued runs can then start. No bulk resume; call once per function.",
+        "operationId": "V2_ResumeFunction",
+        "parameters": [
+          {
+            "description": "App ID.",
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Function ID.",
+            "in": "path",
+            "name": "functionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2ResumeFunctionResponse"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Resume a function",
         "tags": [
           "Functions"
         ],
@@ -4693,6 +4810,46 @@
         },
         "type": "object"
       },
+      "V2CreateReplayBody": {
+        "properties": {
+          "from": {
+            "description": "Inclusive start of the queued-at time range",
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "description": "Replay name, between 3 and 64 characters",
+            "example": "Replay cancelled orders",
+            "type": "string"
+          },
+          "statuses": {
+            "description": "Run statuses to replay. Accepts ALL, COMPLETED, FAILED, CANCELLED, or SKIPPED_PAUSED. ALL cannot be combined with another status. Between 1 and 5 values are required, including duplicates; exceeding this limit returns HTTP 400.",
+            "items": {
+              "enum": [
+                "ALL",
+                "COMPLETED",
+                "FAILED",
+                "CANCELLED",
+                "SKIPPED_PAUSED"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "until": {
+            "description": "Inclusive end of the queued-at time range. May equal from. Values up to 5 seconds in the future are accepted for clock skew and clamped to the current server time; later values return HTTP 400.",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "from",
+          "until",
+          "statuses"
+        ],
+        "type": "object"
+      },
       "V2CreateSandboxSnapshotBody": {
         "properties": {
           "name": {
@@ -5145,6 +5302,17 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/v2Env"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/v2ResponseMetadata"
+          }
+        },
+        "type": "object"
+      },
+      "v2CreateReplayResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/v2Replay"
           },
           "metadata": {
             "$ref": "#/components/schemas/v2ResponseMetadata"
@@ -6671,6 +6839,53 @@
         },
         "type": "object"
       },
+      "v2Replay": {
+        "properties": {
+          "createdAt": {
+            "description": "Time the replay was created",
+            "format": "date-time",
+            "type": "string"
+          },
+          "from": {
+            "description": "Inclusive start of the queued-at time range. Echoes the request timestamp normalized to UTC.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "functionId": {
+            "description": "SDK function ID within the app. Legacy app-prefixed function IDs are also accepted (at most 256 bytes).",
+            "type": "string"
+          },
+          "id": {
+            "description": "Replay ID",
+            "example": "550e8400-e29b-41d4-a716-446655440000",
+            "type": "string"
+          },
+          "name": {
+            "description": "Replay name, between 3 and 64 characters. Echoes the request after trimming surrounding whitespace.",
+            "type": "string"
+          },
+          "statuses": {
+            "description": "Run statuses to replay. Accepts ALL, COMPLETED, FAILED, CANCELLED, or SKIPPED_PAUSED. ALL cannot be combined with another status. Between 1 and 5 values are required, including duplicates; exceeding this limit returns HTTP 400. Echoes the normalized request with surrounding whitespace trimmed, values uppercased, and duplicates removed.",
+            "items": {
+              "enum": [
+                "ALL",
+                "COMPLETED",
+                "FAILED",
+                "CANCELLED",
+                "SKIPPED_PAUSED"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "until": {
+            "description": "Inclusive end of the queued-at time range. May equal from. Values up to 5 seconds in the future are accepted for clock skew and clamped to the current server time; later values return HTTP 400. Echoes the request timestamp normalized to UTC and clamped when necessary.",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "v2RerunData": {
         "properties": {
           "runId": {
@@ -6726,6 +6941,17 @@
           },
           "timeRange": {
             "$ref": "#/components/schemas/v2TimeRange"
+          }
+        },
+        "type": "object"
+      },
+      "v2ResumeFunctionResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/v2Function"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/v2ResponseMetadata"
           }
         },
         "type": "object"
