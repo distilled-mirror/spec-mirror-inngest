@@ -50,12 +50,8 @@ This endpoint is rate limited and cached for 5 seconds.
   - [Pause a function](/v2/functions/PauseFunction): Pauses a function. Idempotent: pausing a paused function returns 200 and changes nothing. Send no request body. Runs already executing may continue. In Cloud, the pause can take up to a minute to apply, new runs are skipped while paused, and runs still unfinished after 7 days paused are cancelled, same as pausing in the dashboard. Wait for a pause or resume to finish before sending the opposite action: requests sent close together can be skipped or apply out of order. Confirm with GetFunction after the cache has refreshed and retry if needed. In the dev server, the pause applies right away, new runs stay queued, and it lasts until resumed or restarted. No bulk pause; call once per function.
   - [Resume a function](/v2/functions/ResumeFunction): Resumes a paused function. Idempotent: resuming a function that is not paused returns 200 with isPaused: false. The dev server still wakes the queue so retries can recover a failed wake. Send no request body. In Cloud, the response reflects the requested state; the resume can take up to a minute to apply. A future scheduled pause returns 409 and is left unchanged. New runs skipped while paused are not recreated. Wait for a pause or resume to finish before sending the opposite action: requests sent close together can be skipped or apply out of order. Confirm with GetFunction after the cache has refreshed and retry if needed. In the dev server, resume clears the pause after waking the queue; a failed wake leaves the pause in place. Queued runs can then start. No bulk resume; call once per function.
 
-  - **Experiments**
-  - [List experiments for a function](/v2/experiments/ListExperiments2): Lists observed experiments for one function in the authenticated environment.
-  - [Get experiment aggregates](/v2/experiments/GetExperiment): Fetches variant run counts and score aggregates for one experiment on one function.
-  - [List experiments](/v2/experiments/ListExperiments): Lists observed experiments in the authenticated environment. Use the nested app and function route to scope results to one function.
-
   - **Runs**
+  - [Create a cancellation](/v2/runs/CreateCancellation): Cancels a function's runs queued between from and until, inclusive, with millisecond precision. until may be up to now plus five seconds. There is no cap on range width; a from far in the past includes all queued runs through until. Includes runs that have never started, even when the function is paused. Running runs stop before their next step; sleeping or waiting runs are cancelled when they next resume. A step already executing may finish. The optional if expression filters the triggering event. Returns 201 when created; cancellation happens asynchronously. Not idempotent: each request creates another cancellation.
   - [Create replay](/v2/runs/CreateReplay): Creates an asynchronous replay for matching runs of one function. Cloud bounds have millisecond precision: from rounds down; until includes the end of its millisecond. Dev server bounds are inclusive at stored timestamp precision. Dev server replays run in memory and are lost on restart. Requests are not idempotent: retrying creates another replay. In Inngest Cloud, replays are listed on the function's Replays page in the dashboard. Scheduling is best effort and does not preserve event order.
   - [List runs for a function](/v2/runs/ListFunctionRuns): Lists runs for one function in the authenticated environment
   - [Get event runs](/v2/runs/GetEventRuns): Lists function runs triggered by a specific event
@@ -66,12 +62,24 @@ This endpoint is rate limited and cached for 5 seconds.
   - [Create score](/v2/runs/CreateScore): Submits one or more named scores for a function run, or for specific steps when step IDs are provided. Scores are recorded as run metadata and aggregated for experiments.
   - [Get function trace](/v2/runs/GetFunctionTrace): Fetches the trace tree for a single function run
 
+  - **Experiments**
+  - [List experiments for a function](/v2/experiments/ListExperiments2): Lists observed experiments for one function in the authenticated environment.
+  - [Get experiment aggregates](/v2/experiments/GetExperiment): Fetches variant run counts and score aggregates for one experiment on one function.
+  - [List experiments](/v2/experiments/ListExperiments): Lists observed experiments in the authenticated environment. Use the nested app and function route to scope results to one function.
+
   - **Builds**
   - [List recent workspace builds](/v2/builds/ListBuilds)
   - [Get a build](/v2/builds/GetBuild)
   - [Cancel an unfinished build](/v2/builds/CancelBuild)
   - [Create a build](/v2/builds/CreateBuild): Upload one linux/amd64 docker-save tar or tar.gz to upload_url in a PUT request with every header in upload_headers, then commit the upload to start conversion. Requires image-build access.
   - [Commit an upload and start the build](/v2/builds/CommitBuild)
+
+  - **Deploys**
+  - [List recent workspace deploys](/v2/deploys/ListDeploys)
+  - [Get a deploy](/v2/deploys/GetDeploy)
+  - [Cancel an unfinished deploy](/v2/deploys/CancelDeploy)
+  - [Create a deploy](/v2/deploys/CreateDeploy): Provide config from the selected apps entry in inngest.toml with exactly one of serve or connect. Memory defaults to 2048 MiB, CPU to 1 vCPU, and connect replicas to 1. Serve path defaults to /api/inngest and an omitted port is discovered from the image's exposed ports at launch. Omitted serve_config settings use node defaults. Upload one linux/amd64 docker-save tar or tar.gz to upload_url in a PUT request with every header in upload_headers, then commit the upload to build a function artifact. Runtime ENV, ENTRYPOINT, and CMD come from the image. Requires image-build access.
+  - [Commit an upload and start the deploy](/v2/deploys/CommitDeploy)
 
   - **Webhooks**
   - [List webhooks](/v2/webhooks/ListWebhooks): Lists all webhooks in the specified environment
@@ -83,7 +91,12 @@ This endpoint is rate limited and cached for 5 seconds.
   - [Update environment](/v2/environments/PatchEnv): Partially updates an environment. Only the provided fields will be modified.
 
   - **Events**
+  - [List events](/v2/events/ListEvents): Lists events in descending internal-ID order, excluding internal inngest/ events. Time filters use received time; client-seeded IDs can differ from received-time order. Payloads are omitted unless include=payload. The dev server returns events stored in its database, which is in-memory by default and lost on restart. Cloud returns the same events as the dashboard and v1 API, subject to the plan's event retention.
   - [Send event](/v2/events/SendEvent): Sends one event for testing and debugging. The request accepts the name, data, user, id, and ts fields; send batches and other Event API fields through an Inngest SDK or the Event API. This endpoint uses REST API rate limits and is not intended for high-volume ingestion. Use the returned event ID with the event runs endpoint to inspect any function runs triggered by the event.
+  - [Get an event](/v2/events/GetEvent): Gets an event by its internal ID. Internal inngest/ events are not returned. Payloads are omitted unless include=payload. The dev server returns events stored in its database, which is in-memory by default and lost on restart. Cloud returns the same events as the dashboard and v1 API, subject to the plan's event retention.
+
+  - **Feedback**
+  - [Submit product feedback](/v2/feedback/SubmitFeedback): Sends user-requested product feedback to Inngest support. Cloud only. Submit only feedback the user has asked to share; do not include credentials, secrets, or run payloads. Creates a support ticket, so retries may create duplicates. Requires feedback:write:create. No environment selection is required.
 
   - **Insights**
   - [List event type schemas](/v2/insights/ListInsightsEventSchemas): Returns a paginated list of event type schemas, where each schema describes the shape of a specific event's data as nested JSON.

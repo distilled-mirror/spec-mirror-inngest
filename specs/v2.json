@@ -366,6 +366,135 @@
         "x-beta": true
       }
     },
+    "/apps/{appId}/functions/{functionId}/cancellations": {
+      "post": {
+        "description": "Cancels a function's runs queued between from and until, inclusive, with millisecond precision. until may be up to now plus five seconds. There is no cap on range width; a from far in the past includes all queued runs through until. Includes runs that have never started, even when the function is paused. Running runs stop before their next step; sleeping or waiting runs are cancelled when they next resume. A step already executing may finish. The optional if expression filters the triggering event. Returns 201 when created; cancellation happens asynchronously. Not idempotent: each request creates another cancellation.",
+        "operationId": "V2_CreateCancellation",
+        "parameters": [
+          {
+            "description": "SDK app ID containing the function",
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "SDK function ID within the app. Legacy app-prefixed function IDs are also accepted (at most 256 bytes).",
+            "in": "path",
+            "name": "functionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V2CreateCancellationBody"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2CreateCancellationResponse"
+                }
+              }
+            },
+            "description": "Cancellation created"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2ErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid cancellation request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2ErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication required"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2ErrorResponse"
+                }
+              }
+            },
+            "description": "Permission denied"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2ErrorResponse"
+                }
+              }
+            },
+            "description": "Function not found"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2ErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limit exceeded"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2ErrorResponse"
+                }
+              }
+            },
+            "description": "Unable to create cancellation"
+          },
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2ErrorResponse"
+                }
+              }
+            },
+            "description": "Cancellation creation is not implemented"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Create a cancellation",
+        "tags": [
+          "Runs"
+        ],
+        "x-beta": true
+      }
+    },
     "/apps/{appId}/functions/{functionId}/experiments": {
       "get": {
         "description": "Lists observed experiments for one function in the authenticated environment.",
@@ -1309,6 +1438,225 @@
         "x-beta": true
       }
     },
+    "/deploys": {
+      "get": {
+        "operationId": "V2_ListDeploys",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2ListDeploysResponse"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "List recent workspace deploys",
+        "tags": [
+          "Deploys"
+        ],
+        "x-beta": true
+      }
+    },
+    "/deploys/{deployId}": {
+      "get": {
+        "operationId": "V2_GetDeploy",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "deployId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2DeployResponse"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Get a deploy",
+        "tags": [
+          "Deploys"
+        ],
+        "x-beta": true
+      }
+    },
+    "/deploys/{deployId}/cancel": {
+      "post": {
+        "operationId": "V2_CancelDeploy",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "deployId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V2CancelDeployBody"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2DeployResponse"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Cancel an unfinished deploy",
+        "tags": [
+          "Deploys"
+        ],
+        "x-beta": true
+      }
+    },
+    "/deploys/{name}": {
+      "post": {
+        "description": "Provide config from the selected apps entry in inngest.toml with exactly one of serve or connect. Memory defaults to 2048 MiB, CPU to 1 vCPU, and connect replicas to 1. Serve path defaults to /api/inngest and an omitted port is discovered from the image's exposed ports at launch. Omitted serve_config settings use node defaults. Upload one linux/amd64 docker-save tar or tar.gz to upload_url in a PUT request with every header in upload_headers, then commit the upload to build a function artifact. Runtime ENV, ENTRYPOINT, and CMD come from the image. Requires image-build access.",
+        "operationId": "V2_CreateDeploy",
+        "parameters": [
+          {
+            "description": "use a workspace-local name so the deploy stays in the selected workspace.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V2CreateDeployBody"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2CreateDeployResponse"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Create a deploy",
+        "tags": [
+          "Deploys"
+        ],
+        "x-beta": true
+      }
+    },
+    "/deploys/{name}/{deployId}/commit": {
+      "post": {
+        "operationId": "V2_CommitDeploy",
+        "parameters": [
+          {
+            "description": "the name must match CreateDeployRequest so a commit cannot select another deploy.",
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "deployId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V2CommitDeployBody"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2DeployResponse"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Commit an upload and start the deploy",
+        "tags": [
+          "Deploys"
+        ],
+        "x-beta": true
+      }
+    },
     "/env/webhooks": {
       "get": {
         "description": "Lists all webhooks in the specified environment",
@@ -1895,6 +2243,95 @@
       }
     },
     "/events": {
+      "get": {
+        "description": "Lists events in descending internal-ID order, excluding internal inngest/ events. Time filters use received time; client-seeded IDs can differ from received-time order. Payloads are omitted unless include=payload. The dev server returns events stored in its database, which is in-memory by default and lost on restart. Cloud returns the same events as the dashboard and v1 API, subject to the plan's event retention.",
+        "operationId": "V2_ListEvents",
+        "parameters": [
+          {
+            "description": "ID of the last returned event from the previous response. Reuse the same filters and metadata.timeRange on subsequent pages.",
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Number of events per page (min: 1, max: 50). With include=payload the maximum and default are 5; otherwise the default is 40. Zero uses the default. Events can be up to 5 MiB in Cloud (less on lower plans).",
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": "40",
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Inclusive received-time lower bound. Defaults to one hour before until, or one hour before the current time if until is omitted. Must not be after until. The effective window is returned in metadata.timeRange.",
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Inclusive received-time upper bound. Defaults to the current time. When from is omitted, it defaults to one hour before this bound. The effective window is returned in metadata.timeRange.",
+            "in": "query",
+            "name": "until",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Exact event names to include. Repeat to match any of up to 20 names, with up to 256 characters each and no backslashes or control characters.",
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Optional event expansions. Use payload to return the stored event JSON. Payloads can contain personal data and be large, so request them only when needed. Default CLI and MCP OAuth scopes include events:read:*, so agents can read payloads.",
+            "in": "query",
+            "name": "include",
+            "schema": {
+              "items": {
+                "enum": [
+                  "payload"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2ListEventsResponse"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "List events",
+        "tags": [
+          "Events"
+        ],
+        "x-beta": true
+      },
       "post": {
         "description": "Sends one event for testing and debugging. The request accepts the name, data, user, id, and ts fields; send batches and other Event API fields through an Inngest SDK or the Event API. This endpoint uses REST API rate limits and is not intended for high-volume ingestion. Use the returned event ID with the event runs endpoint to inspect any function runs triggered by the event.",
         "operationId": "V2_SendEvent",
@@ -2076,6 +2513,59 @@
         ]
       }
     },
+    "/events/{eventId}": {
+      "get": {
+        "description": "Gets an event by its internal ID. Internal inngest/ events are not returned. Payloads are omitted unless include=payload. The dev server returns events stored in its database, which is in-memory by default and lost on restart. Cloud returns the same events as the dashboard and v1 API, subject to the plan's event retention.",
+        "operationId": "V2_GetEvent",
+        "parameters": [
+          {
+            "description": "Internal event ULID, also used by GetEventRuns.",
+            "in": "path",
+            "name": "eventId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Optional event expansions. Use payload to return the stored event JSON. Payloads can contain personal data and be large, so request them only when needed. Default CLI and MCP OAuth scopes include events:read:*, so agents can read payloads. Events can be up to 5 MiB in Cloud (less on lower plans).",
+            "in": "query",
+            "name": "include",
+            "schema": {
+              "items": {
+                "enum": [
+                  "payload"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2GetEventResponse"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Get an event",
+        "tags": [
+          "Events"
+        ],
+        "x-beta": true
+      }
+    },
     "/events/{eventId}/runs": {
       "get": {
         "description": "Lists function runs triggered by a specific event",
@@ -2222,6 +2712,44 @@
           "Experiments"
         ],
         "x-beta": true
+      }
+    },
+    "/feedback": {
+      "post": {
+        "description": "Sends user-requested product feedback to Inngest support. Cloud only. Submit only feedback the user has asked to share; do not include credentials, secrets, or run payloads. Creates a support ticket, so retries may create duplicates. Requires feedback:write:create. No environment selection is required.",
+        "operationId": "V2_SubmitFeedback",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/v2SubmitFeedbackRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/v2SubmitFeedbackResponse"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Submit product feedback",
+        "tags": [
+          "Feedback"
+        ]
       }
     },
     "/insights/events/schemas": {
@@ -4784,10 +5312,16 @@
       "V2CancelBuildBody": {
         "type": "object"
       },
+      "V2CancelDeployBody": {
+        "type": "object"
+      },
       "V2CancelRunBody": {
         "type": "object"
       },
       "V2CommitBuildBody": {
+        "type": "object"
+      },
+      "V2CommitDeployBody": {
         "type": "object"
       },
       "V2CreateBuildBody": {
@@ -4801,6 +5335,56 @@
           },
           "uploadSha256": {
             "description": "Lowercase SHA256 of the uploaded archive bytes.  commit fails when the\nuploaded bytes have a different hash.",
+            "type": "string"
+          },
+          "uploadSizeBytes": {
+            "format": "int64",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "V2CreateCancellationBody": {
+        "properties": {
+          "from": {
+            "description": "Inclusive lower bound on run queued time, with millisecond precision. No limit on range width.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "if": {
+            "description": "CEL expression over event, the triggering event. Maximum 1024 characters; macros and non-logical functions are restricted.",
+            "type": "string"
+          },
+          "name": {
+            "description": "Optional name, trimmed of surrounding whitespace. Must contain 1 to 255 characters when provided.",
+            "type": "string"
+          },
+          "until": {
+            "description": "Inclusive upper bound on run queued time, with millisecond precision. May be up to now plus five seconds.",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "from",
+          "until"
+        ],
+        "type": "object"
+      },
+      "V2CreateDeployBody": {
+        "description": "runtime config such as ENV and CMD comes from the image archive.",
+        "properties": {
+          "architecture": {
+            "type": "string"
+          },
+          "config": {
+            "$ref": "#/components/schemas/v2DeployConfig"
+          },
+          "tag": {
+            "type": "string"
+          },
+          "uploadSha256": {
+            "description": "use lowercase SHA256 of the uploaded archive bytes.  commit fails when the\nuploaded bytes have a different hash.",
             "type": "string"
           },
           "uploadSizeBytes": {
@@ -5089,7 +5673,8 @@
           "UNSPECIFIED",
           "SERVE",
           "CONNECT",
-          "API"
+          "API",
+          "INNGEST_SERVE"
         ],
         "type": "string"
       },
@@ -5217,6 +5802,38 @@
         },
         "type": "object"
       },
+      "v2Cancellation": {
+        "properties": {
+          "appId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "from": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "functionId": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "if": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "until": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "v2CreateAccountData": {
         "properties": {
           "apiKey": {
@@ -5268,6 +5885,40 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/v2Build"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "uploadHeaders": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "send each header with its exact value.  the server can add a header,\nsuch as a checksum of the archive, without a client change.",
+            "type": "object"
+          },
+          "uploadUrl": {
+            "description": "send the archive in a PUT request body with every header in\nupload_headers.  set Content-Length to upload_size_bytes.  storage\nrejects a request that changes a header or the length.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "v2CreateCancellationResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/v2Cancellation"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/v2ResponseMetadata"
+          }
+        },
+        "type": "object"
+      },
+      "v2CreateDeployResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/v2Deploy"
           },
           "expiresAt": {
             "format": "date-time",
@@ -5451,6 +6102,132 @@
       "v2DeleteSandboxSnapshotResponse": {
         "type": "object"
       },
+      "v2Deploy": {
+        "properties": {
+          "architecture": {
+            "type": "string"
+          },
+          "artifactDigest": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          },
+          "finishedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "description": "ready confirms artifact publication.  the post-deploy step runs after publication.",
+            "type": "string"
+          },
+          "tag": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "v2DeployConfig": {
+        "properties": {
+          "connect": {
+            "$ref": "#/components/schemas/v2DeployConnectConfig"
+          },
+          "description": {
+            "type": "string"
+          },
+          "serve": {
+            "$ref": "#/components/schemas/v2DeployServeConfig"
+          },
+          "serveConfig": {
+            "$ref": "#/components/schemas/v2DeployServeRuntimeConfig"
+          },
+          "spec": {
+            "$ref": "#/components/schemas/v2DeploySpec"
+          }
+        },
+        "type": "object"
+      },
+      "v2DeployConnectConfig": {
+        "properties": {
+          "replicas": {
+            "description": "omission uses one replica.  an explicit zero is invalid.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "v2DeployResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/v2Deploy"
+          }
+        },
+        "type": "object"
+      },
+      "v2DeployServeConfig": {
+        "properties": {
+          "path": {
+            "description": "omission uses /api/inngest inside the workload.",
+            "type": "string"
+          },
+          "port": {
+            "description": "omission selects a port from the image's exposed ports at launch.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "v2DeployServeRuntimeConfig": {
+        "properties": {
+          "idle": {
+            "description": "durations use Go syntax such as 15s and 15m.",
+            "type": "string"
+          },
+          "lifetime": {
+            "type": "string"
+          },
+          "maxRequests": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "multiplex": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "v2DeploySpec": {
+        "properties": {
+          "cpu": {
+            "description": "cpu is in vCPUs.  omission uses 1 vCPU.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "memory": {
+            "description": "memory is in MiB.  omission uses 2048 MiB.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "v2DestroySandboxResponse": {
         "properties": {
           "data": {
@@ -5514,6 +6291,41 @@
         },
         "type": "object"
       },
+      "v2Event": {
+        "properties": {
+          "id": {
+            "description": "Internal event ULID, also used by GetEventRuns.",
+            "type": "string"
+          },
+          "idempotencyKey": {
+            "description": "Sender-supplied event ID used for idempotency.",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "description": "Event timestamp supplied by the sender. Omitted when the stored timestamp is zero.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "payload": {
+            "description": "Stored event JSON (name, data, user, ts, id, v). Present only with include=payload. Payloads can contain personal data and be large, so request them only when needed. Numbers in payloads are JSON float64, so integers above 2^53 may lose precision.",
+            "type": "object"
+          },
+          "receivedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/v2EventSource"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "v2EventFilter": {
         "properties": {
           "events": {
@@ -5546,6 +6358,17 @@
             "type": "string"
           },
           "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "v2EventSource": {
+        "properties": {
+          "id": {
             "type": "string"
           },
           "name": {
@@ -5698,6 +6521,15 @@
           "weight": {
             "format": "double",
             "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "v2FeedbackData": {
+        "properties": {
+          "accepted": {
+            "description": "True only after the support ticket was created.",
+            "type": "boolean"
           }
         },
         "type": "object"
@@ -6163,6 +6995,17 @@
         },
         "type": "object"
       },
+      "v2GetEventResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/v2Event"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/v2ResponseMetadata"
+          }
+        },
+        "type": "object"
+      },
       "v2GetEventRunsResponse": {
         "properties": {
           "data": {
@@ -6315,6 +7158,19 @@
         },
         "type": "object"
       },
+      "v2InsightsColumnHint": {
+        "default": "UNSPECIFIED",
+        "description": " - INSIGHTS_COLUMN_HINT_SESSION: A session reference: a {key, id} object, not a bare ID string.",
+        "enum": [
+          "UNSPECIFIED",
+          "APP_ID",
+          "FUNCTION_ID",
+          "RUN_ID",
+          "EVENT_ID",
+          "SESSION"
+        ],
+        "type": "string"
+      },
       "v2InsightsDiagnostic": {
         "properties": {
           "code": {
@@ -6383,6 +7239,13 @@
             "description": "Name of the column in the insights query result",
             "type": "string"
           },
+          "pathHints": {
+            "description": "What kind of ID each JSON path into this column's values holds (an empty path is the column's own value), e.g. runs.inputs' [*].id path holds event IDs. Empty when the column isn't traceable to a known table column.",
+            "items": {
+              "$ref": "#/components/schemas/v2InsightsPathHint"
+            },
+            "type": "array"
+          },
           "type": {
             "$ref": "#/components/schemas/v2InsightsOutputColumnType"
           }
@@ -6401,10 +7264,58 @@
         ],
         "type": "string"
       },
+      "v2InsightsPathHint": {
+        "properties": {
+          "hint": {
+            "$ref": "#/components/schemas/v2InsightsColumnHint"
+          },
+          "path": {
+            "description": "Path into the column's value; empty for the column's own value",
+            "items": {
+              "$ref": "#/components/schemas/v2InsightsPathSegment"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "v2InsightsPathSegment": {
+        "properties": {
+          "key": {
+            "description": "Object key, unset when wildcard is true",
+            "type": "string"
+          },
+          "wildcard": {
+            "description": "Every element of an array",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "v2InsightsQueryInfo": {
+        "properties": {
+          "limited": {
+            "description": "Whether the server applied the default row limit or reduced an explicit LIMIT to the maximum",
+            "type": "boolean"
+          },
+          "primaryTable": {
+            "description": "The table the query's outermost FROM reads, if there is exactly one",
+            "type": "string"
+          },
+          "tables": {
+            "description": "Every table the query reads",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "v2InsightsRow": {
         "properties": {
           "values": {
-            "description": "Values for a single row of the insights query result, where each value corresponds to a column. The value is represented as a JSON object to allow for flexible typing (e.g., string, number, boolean, etc.)",
+            "description": "Values for a single row of the insights query result, where each value corresponds to a column. The value is represented as a JSON object to allow for flexible typing (e.g., string, number, boolean, etc.).",
             "items": {},
             "type": "array"
           }
@@ -6502,6 +7413,35 @@
               "$ref": "#/components/schemas/v2Build"
             },
             "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "v2ListDeploysResponse": {
+        "properties": {
+          "data": {
+            "description": "the response has at most 100 deploys to bound its size.",
+            "items": {
+              "$ref": "#/components/schemas/v2Deploy"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "v2ListEventsResponse": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/v2Event"
+            },
+            "type": "array"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/v2ResponseMetadata"
+          },
+          "page": {
+            "$ref": "#/components/schemas/v2Page"
           }
         },
         "type": "object"
@@ -6772,6 +7712,9 @@
               "$ref": "#/components/schemas/v2InsightsDiagnostic"
             },
             "type": "array"
+          },
+          "info": {
+            "$ref": "#/components/schemas/v2InsightsQueryInfo"
           },
           "rows": {
             "description": "Rows of the insights query result, where each row contains a list of values corresponding to the columns",
@@ -7455,6 +8398,41 @@
         },
         "type": "object"
       },
+      "v2SubmitFeedbackRequest": {
+        "properties": {
+          "email": {
+            "description": "Optional reply-to email, up to 254 characters. Treated as unverified contact information, not as the submitter identity.",
+            "type": "string"
+          },
+          "feedback": {
+            "description": "Feedback to share with Inngest support, up to 10000 characters. Do not include secrets or sensitive run data.",
+            "type": "string"
+          },
+          "name": {
+            "description": "Optional contact name, up to 200 characters. Treated as caller-supplied contact information.",
+            "type": "string"
+          },
+          "operation": {
+            "description": "Optional API operation, CLI command, or MCP tool this feedback concerns, up to 200 characters.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "feedback"
+        ],
+        "type": "object"
+      },
+      "v2SubmitFeedbackResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/v2FeedbackData"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/v2ResponseMetadata"
+          }
+        },
+        "type": "object"
+      },
       "v2SyncAppData": {
         "properties": {
           "appId": {
@@ -7584,6 +8562,10 @@
       },
       "v2TraceSpanMetadata": {
         "properties": {
+          "isUser": {
+            "description": "Whether kind is user-defined. kind may be returned without its\nuserland/inngest prefix, so this tells a user kind from an internal one.",
+            "type": "boolean"
+          },
           "kind": {
             "type": "string"
           },
@@ -7714,6 +8696,10 @@
       "name": "Account"
     },
     {
+      "description": "Submit product feedback",
+      "name": "Feedback"
+    },
+    {
       "description": "Create and manage environments",
       "name": "Environments"
     },
@@ -7752,6 +8738,10 @@
     {
       "description": "Build images for sandboxes and compute",
       "name": "Builds"
+    },
+    {
+      "description": "Deploy apps to compute",
+      "name": "Deploys"
     },
     {
       "description": "Inspect experiment variants and aggregates",
