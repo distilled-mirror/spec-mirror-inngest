@@ -1294,6 +1294,87 @@
       }
     },
     "/apps/{appId}/syncs": {
+      "get": {
+        "description": "Lists app syncs newest first. Cloud keeps syncs until the app is deleted, with no separate retention window. The dev server does not support sync history and returns 501 for both list and get. Use GetApp latestSync for the dev server's current state.",
+        "operationId": "V2_ListAppSyncs",
+        "parameters": [
+          {
+            "description": "The user-defined app ID",
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Pagination cursor from previous response: the UUID of the last returned sync",
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Number of syncs to return per page: 1-100; 0 or omitted uses 20",
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": "20",
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "default": {
+                    "value": {
+                      "data": [
+                        {
+                          "appId": "my-app",
+                          "appVersion": "v1.2.3",
+                          "createdAt": "2026-06-10T11:55:00Z",
+                          "framework": "nextjs",
+                          "id": "7d9a8e1b-3f24-4d6c-9a50-2e7f6b8c1d03",
+                          "sdkLanguage": "typescript",
+                          "sdkVersion": "3.22.0",
+                          "status": "success",
+                          "url": "https://example.com/api/inngest"
+                        }
+                      ],
+                      "metadata": {
+                        "fetchedAt": "2026-06-10T12:00:00Z"
+                      },
+                      "page": {
+                        "hasMore": false,
+                        "limit": 20
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/v2ListAppSyncsResponse"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "List app syncs",
+        "tags": [
+          "Apps"
+        ],
+        "x-beta": true
+      },
       "post": {
         "description": "Sync an app at the provided URL.",
         "operationId": "V2_SyncApp",
@@ -1397,6 +1478,74 @@
           }
         ],
         "summary": "Sync app",
+        "tags": [
+          "Apps"
+        ],
+        "x-beta": true
+      }
+    },
+    "/apps/{appId}/syncs/{syncId}": {
+      "get": {
+        "description": "Gets an app sync. Cloud keeps syncs until the app is deleted, with no separate retention window. The dev server does not support sync history and returns 501 for both list and get. Use GetApp latestSync for the dev server's current state.",
+        "operationId": "V2_GetAppSync",
+        "parameters": [
+          {
+            "description": "The user-defined app ID",
+            "in": "path",
+            "name": "appId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Sync UUID",
+            "in": "path",
+            "name": "syncId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "default": {
+                    "value": {
+                      "data": {
+                        "appId": "my-app",
+                        "appVersion": "v1.2.3",
+                        "createdAt": "2026-06-10T11:55:00Z",
+                        "framework": "nextjs",
+                        "id": "7d9a8e1b-3f24-4d6c-9a50-2e7f6b8c1d03",
+                        "sdkLanguage": "typescript",
+                        "sdkVersion": "3.22.0",
+                        "status": "success",
+                        "url": "https://example.com/api/inngest"
+                      },
+                      "metadata": {
+                        "fetchedAt": "2026-06-10T12:00:00Z"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/v2GetAppSyncResponse"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Get app sync",
         "tags": [
           "Apps"
         ],
@@ -7218,6 +7367,17 @@
         },
         "type": "object"
       },
+      "v2GetAppSyncResponse": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/v2Sync"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/v2ResponseMetadata"
+          }
+        },
+        "type": "object"
+      },
       "v2GetAppsResponse": {
         "properties": {
           "data": {
@@ -7641,6 +7801,23 @@
           },
           "metadata": {
             "$ref": "#/components/schemas/v2ResponseMetadata"
+          }
+        },
+        "type": "object"
+      },
+      "v2ListAppSyncsResponse": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/v2Sync"
+            },
+            "type": "array"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/v2ResponseMetadata"
+          },
+          "page": {
+            "$ref": "#/components/schemas/v2Page"
           }
         },
         "type": "object"
@@ -8697,6 +8874,57 @@
           },
           "metadata": {
             "$ref": "#/components/schemas/v2ResponseMetadata"
+          }
+        },
+        "type": "object"
+      },
+      "v2Sync": {
+        "properties": {
+          "appId": {
+            "description": "The user-defined app ID",
+            "type": "string"
+          },
+          "appVersion": {
+            "description": "App version reported by this sync",
+            "type": "string"
+          },
+          "createdAt": {
+            "description": "When the sync was created",
+            "format": "date-time",
+            "type": "string"
+          },
+          "error": {
+            "$ref": "#/components/schemas/v2SyncAppError"
+          },
+          "framework": {
+            "description": "Framework reported by this sync",
+            "type": "string"
+          },
+          "id": {
+            "description": "Sync UUID, matching the ID returned by SyncApp",
+            "type": "string"
+          },
+          "sdkLanguage": {
+            "description": "SDK language reported by this sync",
+            "type": "string"
+          },
+          "sdkVersion": {
+            "description": "SDK version reported by this sync",
+            "type": "string"
+          },
+          "status": {
+            "description": "Status of the sync. `success` and `duplicate` are successful terminal states. `duplicate` means the sync payload matched the previous successful sync, so no function configuration changes were applied. `error` is a failed terminal state, and `pending` means the sync is still in progress.",
+            "enum": [
+              "pending",
+              "success",
+              "error",
+              "duplicate"
+            ],
+            "type": "string"
+          },
+          "url": {
+            "description": "URL for the Inngest endpoint in the app",
+            "type": "string"
           }
         },
         "type": "object"

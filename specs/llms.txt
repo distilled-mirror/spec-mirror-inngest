@@ -41,7 +41,9 @@ This endpoint is rate limited and cached for 5 seconds.
   - **Apps**
   - [Get apps](/v2/apps/GetApps): Lists active apps in the authenticated environment. Set archived to true to list archived apps instead.
   - [Get app](/v2/apps/GetApp): Fetches details for a single app, including sync metadata and function count
+  - [List app syncs](/v2/apps/ListAppSyncs): Lists app syncs newest first. Cloud keeps syncs until the app is deleted, with no separate retention window. The dev server does not support sync history and returns 501 for both list and get. Use GetApp latestSync for the dev server's current state.
   - [Sync app](/v2/apps/SyncApp): Sync an app at the provided URL.
+  - [Get app sync](/v2/apps/GetAppSync): Gets an app sync. Cloud keeps syncs until the app is deleted, with no separate retention window. The dev server does not support sync history and returns 501 for both list and get. Use GetApp latestSync for the dev server's current state.
 
   - **Functions**
   - [Get functions](/v2/functions/GetFunctions): Lists function configuration and status details for an app
